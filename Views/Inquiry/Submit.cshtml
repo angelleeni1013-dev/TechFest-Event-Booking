@@ -1,0 +1,64 @@
+﻿@model Inquiry
+@{
+    ViewData["Title"] = "Submit Inquiry";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card fade-in-up">
+                <div class="card-header" style="background-color: #3a2d34;">
+                    <h4 class="mb-0 text-white">
+                        <i class="bi bi-chat-dots"></i> Submit Inquiry
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted mb-4">Have a question or need help? Send us a message and we'll get back to you within 24-48 hours.</p>
+
+                    <form asp-action="Submit" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <input type="hidden" asp-for="ClientEmail" />
+
+                        <div class="row mb-3">
+                            <label asp-for="Subject" class="col-sm-3 col-form-label">
+                                Subject <span class="text-danger">*</span>
+                            </label>
+                            <div class="col-sm-9">
+                                <input asp-for="Subject" class="form-control" placeholder="Brief description of your inquiry" />
+                                <span asp-validation-for="Subject" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label asp-for="Message" class="col-sm-3 col-form-label">
+                                Message <span class="text-danger">*</span>
+                            </label>
+                            <div class="col-sm-9">
+                                <textarea asp-for="Message" class="form-control" rows="6" placeholder="Please provide detailed information about your inquiry..."></textarea>
+                                <span asp-validation-for="Message" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="row">
+                            <div class="col-sm-9 offset-sm-3">
+                                <button type="submit" class="btn btn-primary me-2">
+                                    <i class="bi bi-send"></i> Submit Inquiry
+                                </button>
+                                <a asp-action="MyInquiries" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left"></i> Back to My Inquiries
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

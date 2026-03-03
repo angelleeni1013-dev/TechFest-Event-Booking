@@ -1,0 +1,108 @@
+﻿@{
+    ViewData["Title"] = "Verify Payment";
+    var booking = ViewBag.Booking as Booking;
+    var verificationId = ViewBag.VerificationId;
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card fade-in-up">
+                <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h4 class="mb-0 text-white text-center">
+                        <i class="bi bi-shield-check"></i> OTP Verification
+                    </h4>
+                </div>
+                <div class="card-body p-4 text-center">
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <!-- Icon -->
+                    <div class="mb-4">
+                        <i class="bi bi-envelope-check" style="font-size: 5rem; color: #667eea;"></i>
+                    </div>
+
+                    <!-- Instructions -->
+                    <h5 class="mb-3">Enter Your OTP Code</h5>
+                    <p class="text-muted mb-1">We've sent a 6-digit verification code to:</p>
+                    <p class="fw-bold">@booking.ClientEmail</p>
+                    <p class="text-muted small mb-4">
+                        <i class="bi bi-clock"></i> Code expires in 10 minutes
+                    </p>
+
+                    <!-- Booking Reference -->
+                    <div class="alert alert-light mb-4">
+                        <small class="text-muted">Booking Reference</small>
+                        <h6 class="mb-0">#@booking.BookingId - @booking.EventName</h6>
+                    </div>
+
+                    <!-- OTP Form -->
+                    <form asp-action="VerifyPayment" method="post">
+                        <input type="hidden" name="verificationId" value="@verificationId" />
+
+                        <div class="mb-4">
+                            <label for="otpCode" class="form-label fw-bold">OTP Code</label>
+                            <input type="text"
+                                   id="otpCode"
+                                   name="otpCode"
+                                   class="form-control form-control-lg text-center"
+                                   style="letter-spacing: 10px; font-size: 24px; font-weight: bold;"
+                                   placeholder="000000"
+                                   maxlength="6"
+                                   required
+                                   autofocus />
+                            <small class="form-text text-muted">Enter the 6-digit code from your email</small>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle"></i> Verify & Complete Payment
+                            </button>
+                            <a asp-action="PaymentDetails" asp-route-bookingId="@booking.BookingId"
+                               class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-clockwise"></i> Resend OTP
+                            </a>
+                            <a asp-action="MyBookings" class="btn btn-link text-muted">
+                                Cancel Payment
+                            </a>
+                        </div>
+                    </form>
+
+                    <!-- Help Text -->
+                    <div class="mt-4 p-3" style="background-color: #f8f9fa; border-radius: 10px;">
+                        <p class="mb-2 small text-muted">
+                            <i class="bi bi-info-circle"></i> <strong>Didn't receive the code?</strong>
+                        </p>
+                        <ul class="text-start small text-muted mb-0" style="list-style-position: inside;">
+                            <li>Check your spam/junk folder</li>
+                            <li>Wait a few minutes and check again</li>
+                            <li>Click "Resend OTP" to get a new code</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-format OTP input (only numbers)
+        document.getElementById('otpCode').addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/\D/g, '');
+        });
+
+        // Auto-submit when 6 digits entered (optional)
+        document.getElementById('otpCode').addEventListener('input', function(e) {
+            if (e.target.value.length === 6) {
+                // Optional: auto-submit form
+                // e.target.form.submit();
+            }
+        });
+    </script>
+}

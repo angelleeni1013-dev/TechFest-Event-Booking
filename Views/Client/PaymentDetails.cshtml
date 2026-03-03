@@ -1,0 +1,237 @@
+﻿@model PaymentDetailsViewModel
+@{
+    ViewData["Title"] = "Payment Details";
+    var booking = ViewBag.Booking as Booking;
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4" style="color: #3a2d34;">
+        <i class="bi bi-credit-card"></i> Payment Details
+    </h2>
+
+    @{
+        var bookings = ViewBag.Bookings as List<Booking>;
+        var firstBooking = bookings?.FirstOrDefault();
+    }
+
+    <!-- Booking Summary -->
+    <div class="alert alert-info mb-4">
+        <h5><i class="bi bi-info-circle"></i> Booking Summary</h5>
+        <hr>
+        <div class="row">
+            <div class="col-md-6">
+                @if (firstBooking != null)
+                {
+                    <p><strong>Event:</strong> @firstBooking.EventName</p>
+                }
+                <p><strong>Days:</strong> @ViewBag.DaysBooked</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Number of Days:</strong> @bookings.Count</p>
+                <p><strong>Amount to Pay:</strong> <span class="text-success fw-bold fs-4">RM @ViewBag.TotalCharges.ToString("N2")</span></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header text-white" style="background-color: #3a2d34;">
+            <h5 class="mb-0">Enter Payment Information</h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="PaymentDetails" method="post" id="paymentForm">
+                <input type="hidden" asp-for="BookingId" />
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="row mb-3">
+                    <label asp-for="PaymentMethod" class="col-sm-3 col-form-label">
+                        Payment Method <span class="text-danger">*</span>
+                    </label>
+                    <div class="col-sm-9">
+                        <select asp-for="PaymentMethod" class="form-select" id="paymentMethod">
+                            <option value="">-- Select Payment Method --</option>
+                            <option value="Credit/Debit Card">Credit/Debit Card</option>
+                            <option value="Touch 'n Go eWallet">Touch 'n Go eWallet</option>
+                            <option value="Online Banking">Online Banking (FPX)</option>
+                        </select>
+                        <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Credit/Debit Card Fields -->
+                <div id="cardFields" style="display: none;">
+                    <h5 class="mb-3"><i class="bi bi-credit-card"></i> Card Information</h5>
+
+                    <div class="row mb-3">
+                        <label asp-for="CardNumber" class="col-sm-3 col-form-label">
+                            Card Number <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-9">
+                            <input asp-for="CardNumber" class="form-control" placeholder="1234 5678 9012 3456" maxlength="16" />
+                            <span asp-validation-for="CardNumber" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label asp-for="CardHolderName" class="col-sm-3 col-form-label">
+                            Card Holder Name <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-9">
+                            <input asp-for="CardHolderName" class="form-control" placeholder="Enter name as on card" />
+                            <span asp-validation-for="CardHolderName" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label asp-for="ExpiryDate" class="col-sm-3 col-form-label">
+                            Expiry Date <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-9">
+                            <input asp-for="ExpiryDate" class="form-control" placeholder="MM/YY" maxlength="5" />
+                            <span asp-validation-for="ExpiryDate" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label asp-for="CVV" class="col-sm-3 col-form-label">
+                            CVV <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-9">
+                            <input asp-for="CVV" class="form-control" placeholder="123" maxlength="3" type="password" />
+                            <span asp-validation-for="CVV" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Touch 'n Go eWallet Fields -->
+                <div id="ewalletFields" style="display: none;">
+                    <h5 class="mb-3"><i class="bi bi-phone"></i> Touch 'n Go eWallet Information</h5>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> Enter your Touch 'n Go registered phone number. An OTP will be sent to verify your payment.
+                    </div>
+
+                    <div class="row mb-3">
+                        <label asp-for="PhoneNumber" class="col-sm-3 col-form-label">
+                            Phone Number <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-9">
+                            <input asp-for="PhoneNumber" class="form-control" placeholder="0123456789" maxlength="11" />
+                            <small class="form-text text-muted">Enter your Touch 'n Go registered phone number (10-11 digits)</small>
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Online Banking Fields -->
+                <div id="bankingFields" style="display: none;">
+                    <h5 class="mb-3"><i class="bi bi-bank"></i> Bank Information</h5>
+
+                    <div class="row mb-3">
+                        <label asp-for="BankName" class="col-sm-3 col-form-label">
+                            Bank Name <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-9">
+                            <select asp-for="BankName" class="form-select">
+                                <option value="">-- Select Bank --</option>
+                                <option value="Maybank">Maybank</option>
+                                <option value="CIMB Bank">CIMB Bank</option>
+                                <option value="Public Bank">Public Bank</option>
+                                <option value="RHB Bank">RHB Bank</option>
+                                <option value="Hong Leong Bank">Hong Leong Bank</option>
+                                <option value="AmBank">AmBank</option>
+                                <option value="Bank Islam">Bank Islam</option>
+                            </select>
+                            <span asp-validation-for="BankName" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label asp-for="AccountNumber" class="col-sm-3 col-form-label">
+                            Account Number <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-9">
+                            <input asp-for="AccountNumber" class="form-control" placeholder="Enter account number (10-14 digits)" maxlength="14" />
+                            <span asp-validation-for="AccountNumber" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="alert alert-warning">
+                    <h6><i class="bi bi-shield-lock"></i> Security Notice</h6>
+                    <ul class="mb-0">
+                        <li>Your payment information is encrypted and secure</li>
+                        <li>An OTP will be sent to your email for verification</li>
+                        <li>Never share your OTP with anyone</li>
+                    </ul>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-9 offset-sm-3">
+                        <button type="submit" class="btn btn-success me-2">
+                            <i class="bi bi-lock"></i> Proceed to OTP Verification
+                        </button>
+                        <a asp-action="MyBookings" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Cancel Payment
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Show/hide fields based on payment method
+        document.getElementById('paymentMethod').addEventListener('change', function () {
+            const method = this.value;
+            const cardFields = document.getElementById('cardFields');
+            const ewalletFields = document.getElementById('ewalletFields');
+            const bankingFields = document.getElementById('bankingFields');
+
+            cardFields.style.display = 'none';
+            ewalletFields.style.display = 'none';
+            bankingFields.style.display = 'none';
+
+            if (method === 'Credit/Debit Card') {
+                cardFields.style.display = 'block';
+            } else if (method === "Touch 'n Go eWallet") {
+                ewalletFields.style.display = 'block';
+            } else if (method === 'Online Banking') {
+                bankingFields.style.display = 'block';
+            }
+        });
+
+        // Format card number (numbers only)
+        document.querySelector('input[name="CardNumber"]')?.addEventListener('input', function (e) {
+            e.target.value = e.target.value.replace(/\D/g, '');
+        });
+
+        // Format expiry date (MM/YY)
+        document.querySelector('input[name="ExpiryDate"]')?.addEventListener('input', function (e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.slice(0, 2) + '/' + value.slice(2, 4);
+            }
+            e.target.value = value;
+        });
+
+        // Only numbers for CVV
+        document.querySelector('input[name="CVV"]')?.addEventListener('input', function (e) {
+            e.target.value = e.target.value.replace(/\D/g, '');
+        });
+
+        // Only numbers for phone number
+        document.querySelector('input[name="PhoneNumber"]')?.addEventListener('input', function (e) {
+            e.target.value = e.target.value.replace(/\D/g, '');
+        });
+
+        // Only numbers for account number
+        document.querySelector('input[name="AccountNumber"]')?.addEventListener('input', function (e) {
+            e.target.value = e.target.value.replace(/\D/g, '');
+        });
+    </script>
+}

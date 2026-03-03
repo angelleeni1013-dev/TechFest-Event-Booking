@@ -1,0 +1,78 @@
+﻿@model Inquiry
+@{
+    ViewData["Title"] = "Reply to Inquiry";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card">
+                <div class="card-header" style="background-color: #3a2d34;">
+                    <h4 class="mb-0 text-white">
+                        <i class="bi bi-reply"></i> Reply to Inquiry #@Model.InquiryId
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Inquiry Details -->
+                    <div class="alert alert-light mb-4">
+                        <h5 class="mb-3">Inquiry Details</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Client Email:</strong> @Model.ClientEmail</p>
+                                <p><strong>Subject:</strong> @Model.Subject</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p>
+                                    <strong>Status:</strong>
+                                    @if (Model.Status == "Pending")
+                                    {
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                    }
+                                    else if (Model.Status == "Responded")
+                                    {
+                                        <span class="badge bg-info">Responded</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">Solved</span>
+                                    }
+                                </p>
+                                <p><strong>Submitted:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                            </div>
+                        </div>
+                        <hr>
+                        <h6>Client Message:</h6>
+                        <p class="mb-0" style="white-space: pre-wrap;">@Model.Message</p>
+                    </div>
+
+                    <!-- Reply Form -->
+                    <form asp-action="Reply" method="post">
+                        <input type="hidden" name="id" value="@Model.InquiryId" />
+
+                        <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label">
+                                Admin Reply <span class="text-danger">*</span>
+                            </label>
+                            <div class="col-sm-10">
+                                <textarea name="adminReply" class="form-control" rows="6" placeholder="Type your reply here..." required>@Model.AdminReply</textarea>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="row">
+                            <div class="col-sm-10 offset-sm-2">
+                                <button type="submit" class="btn btn-primary me-2">
+                                    <i class="bi bi-send"></i> Send Reply
+                                </button>
+                                <a asp-action="Manage" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left"></i> Back to Inquiries
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

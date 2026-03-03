@@ -1,0 +1,541 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@model List<Booking>
+@{
+    var user = await UserManager.GetUserAsync(User);
+    var isAdmin = user != null && await UserManager.IsInRoleAsync(user, "Admin");
+    var isStaff = user != null && await UserManager.IsInRoleAsync(user, "Staff");
+    var isClient = user != null && await UserManager.IsInRoleAsync(user, "Client");
+}
+@{
+    ViewData["Title"] = "All Bookings";
+}
+<style>
+    .table-custom thead tr,
+    .table-custom thead th {
+        background-color: #3a2d34 !important;
+        color: #ffffff !important;
+    }
+
+    .table-custom tbody tr:nth-child(even) {
+        background-color: #f3f0f1;
+    }
+
+    .table-custom tbody tr:hover {
+        background-color: #e7dfe2;
+    }
+
+    .btn-warning, .btn-danger {
+        border: none;
+    }
+
+    .role-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+    }
+
+    .stat-card {
+        border-radius: 10px;
+        transition: transform 0.2s;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+</style>
+
+<div class="container mt-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 style="color:#3a2d34">
+            <i class="bi bi-calendar-check-fill"></i> TechFest 2026 - All Bookings
+        </h1>
+        <div>
+            @if (isAdmin)
+            {
+                <span class="badge bg-danger role-badge"> ADMIN ACCESS</span>
+            }
+            else if (isStaff)
+            {
+                <span class="badge bg-warning text-dark role-badge"> STAFF ACCESS</span>
+            }
+            else if (isClient)
+            {
+                <span class="badge bg-info role-badge"> CLIENT VIEW ONLY</span>
+            }
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong><i class="bi bi-check-circle-fill"></i></strong> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["WarningMessage"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <strong><i class="bi bi-exclamation-triangle-fill"></i></strong> @TempData["WarningMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong><i class="bi bi-x-circle-fill"></i></strong> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Statistics Cards Row 1 -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card shadow-sm" style="border-left: 4px solid #667eea;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Total Bookings</h6>
+                            <h2 class="mb-0" style="color: #667eea;">@Model.Count()</h2>
+                        </div>
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="bi bi-calendar-check"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card stat-card shadow-sm" style="border-left: 4px solid #28a745;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Confirmed</h6>
+                            <h2 class="mb-0" style="color: #28a745;">@ViewBag.ConfirmedBookings</h2>
+                        </div>
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card stat-card shadow-sm" style="border-left: 4px solid #ffc107;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Pending</h6>
+                            <h2 class="mb-0" style="color: #ffc107;">@ViewBag.PendingBookings</h2>
+                        </div>
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);">
+                            <i class="bi bi-hourglass-split"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card stat-card shadow-sm" style="border-left: 4px solid #17a2b8;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Total Revenue</h6>
+                            <h2 class="mb-0" style="color: #17a2b8;">RM @ViewBag.TotalRevenue.ToString("N2")</h2>
+                        </div>
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);">
+                            <i class="bi bi-cash-stack"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ticket Type, Day & Gender Breakdown -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header text-white" style="background-color:#3a2d34">
+                    <h5 class="mb-0"><i class="bi bi-ticket-perforated"></i> Ticket Type Breakdown</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                             Early Bird (RM120/day)
+                            <span class="badge bg-success rounded-pill">@ViewBag.EarlyBirdCount</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Regular (RM150/day)
+                            <span class="badge bg-primary rounded-pill">@ViewBag.RegularCount</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Student (RM80/day)
+                            <span class="badge bg-info rounded-pill">@ViewBag.StudentCount</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header text-white" style="background-color:#3a2d34">
+                    <h5 class="mb-0"><i class="bi bi-calendar3"></i> Day Breakdown</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Day 1
+                            <span class="badge bg-info rounded-pill">@ViewBag.Day1Count bookings</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Day 2
+                            <span class="badge bg-info rounded-pill">@ViewBag.Day2Count bookings</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Day 3
+                            <span class="badge bg-info rounded-pill">@ViewBag.Day3Count bookings</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header text-white" style="background-color:#3a2d34">
+                    <h5 class="mb-0"><i class="bi bi-gender-ambiguous"></i> Gender Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                             Male
+                            <span class="badge bg-primary rounded-pill">@ViewBag.MaleCount</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                             Female
+                            <span class="badge bg-danger rounded-pill">@ViewBag.FemaleCount</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Other
+                            <span class="badge bg-secondary rounded-pill">@ViewBag.OtherGenderCount</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Status Breakdown -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header text-white" style="background-color:#3a2d34">
+            <h5 class="mb-0"><i class="bi bi-credit-card"></i> Payment Status Overview</h5>
+        </div>
+        <div class="card-body py-4">
+            <div class="row text-center">
+                <!-- Paid -->
+                <div class="col-md-4">
+                    <h6 class="text-muted mb-3">Paid</h6>
+                    <h1 style="font-size: 3rem; font-weight: 600; color: #28a745;" class="mb-0">@ViewBag.PaidCount</h1>
+                </div>
+
+                <!-- Unpaid -->
+                <div class="col-md-4">
+                    <h6 class="text-muted mb-3">Unpaid</h6>
+                    <h1 style="font-size: 3rem; font-weight: 600; color: #ffc107;" class="mb-0">@ViewBag.UnpaidCount</h1>
+                </div>
+
+                <!-- Refunded -->
+                <div class="col-md-4">
+                    <h6 class="text-muted mb-3">Refunded</h6>
+                    <h1 style="font-size: 3rem; font-weight: 600; color: #dc3545;" class="mb-0">@ViewBag.RefundedCount</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Bar -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            @if (isAdmin)
+            {
+                <a asp-action="Add" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Add New Booking
+                </a>
+            }
+            else if (isClient)
+            {
+                <div class="alert alert-info mb-0" role="alert">
+                    <i class="bi bi-info-circle"></i> You have view-only access. Contact admin to add bookings.
+                </div>
+            }
+        </div>
+        <div class="col-md-6">
+            <form asp-action="Index" method="get" class="d-flex">
+                <input type="text" name="searchTerm" class="form-control me-2"
+                       placeholder="Search by name, email, event, gender..."
+                       value="@ViewBag.SearchTerm" />
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="bi bi-search"></i> Search
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sort Bar -->
+    <div class="mb-3">
+        <label class="fw-bold">Sort by:</label>
+        <div class="btn-group" role="group">
+            <a asp-action="Index" asp-route-sortBy="name" asp-route-searchTerm="@ViewBag.SearchTerm"
+               class="btn btn-sm btn-outline-secondary">Name</a>
+            <a asp-action="Index" asp-route-sortBy="day" asp-route-searchTerm="@ViewBag.SearchTerm"
+               class="btn btn-sm btn-outline-secondary">Day</a>
+            <a asp-action="Index" asp-route-sortBy="status" asp-route-searchTerm="@ViewBag.SearchTerm"
+               class="btn btn-sm btn-outline-secondary">Status</a>
+            <a asp-action="Index" asp-route-sortBy="charges" asp-route-searchTerm="@ViewBag.SearchTerm"
+               class="btn btn-sm btn-outline-secondary">Charges</a>
+            <a asp-action="Index" asp-route-sortBy="payment" asp-route-searchTerm="@ViewBag.SearchTerm"
+               class="btn btn-sm btn-outline-secondary">Payment</a>
+            <a asp-action="Index" asp-route-sortBy="gender" asp-route-searchTerm="@ViewBag.SearchTerm"
+               class="btn btn-sm btn-outline-secondary">Gender</a>
+            <a asp-action="Index" asp-route-sortBy="age" asp-route-searchTerm="@ViewBag.SearchTerm"
+               class="btn btn-sm btn-outline-secondary">Age</a>
+        </div>
+    </div>
+
+    <!-- Bookings Table -->
+    <div class="table-responsive">
+        <table class="table table-hover table-custom">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Event</th>
+                    <th>Client</th>
+                    <th>Email</th>
+                    <th>Contact</th>
+                    <th>Gender</th>
+                    <th>Age</th>
+                    <th>Day</th>
+                    <th>Ticket Type</th>
+                    <th>Charges (RM)</th>
+                    <th>Status</th>
+                    <th>Payment Status</th>
+                    <th>Payment Method</th>
+                    <th>Invoice</th>
+                    @if (isAdmin || isStaff)
+                    {
+                        <th class="text-center">Actions</th>
+                    }
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model.Any())
+                {
+                    @foreach (var b in Model)
+                    {
+                        <tr>
+                            <td><strong>#@b.BookingId</strong></td>
+                            <td>@b.EventName</td>
+                            <td>@b.ClientName</td>
+                            <td><small>@b.ClientEmail</small></td>
+                            <td><small>@b.ContactNumber</small></td>
+                            <td>
+                                @if (b.Gender == "Male")
+                                {
+                                    <span class="badge bg-primary"> Male</span>
+                                }
+                                else if (b.Gender == "Female")
+                                {
+                                    <span class="badge bg-danger"> Female</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Other</span>
+                                }
+                            </td>
+                            <td>@b.GetAge() years</td>
+                            <td><span class="badge bg-info">Day @b.Day</span></td>
+                            <td>
+                                @if (b.TicketType == "early-bird")
+                                {
+                                    <span class="badge bg-success"> Early Bird</span>
+                                }
+                                else if (b.TicketType == "regular")
+                                {
+                                    <span class="badge bg-primary">Regular</span>
+                                }
+                                else if (b.TicketType == "student")
+                                {
+                                    <span class="badge bg-info"> Student</span>
+                                }
+                            </td>
+                            <td><strong>RM @b.Charges.ToString("F2")</strong></td>
+                            <td>
+                                @if (b.Status.Trim() == "Confirmed")
+                                {
+                                    <span class="badge bg-success"> @b.Status</span>
+                                }
+                                else if (b.Status.Trim() == "Pending")
+                                {
+                                    <span class="badge bg-warning text-dark"> @b.Status</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger"> @b.Status</span>
+                                }
+                            </td>
+                            <td>
+                                @if (b.PaymentStatus == "Paid")
+                                {
+                                    <span class="badge bg-success"> @b.PaymentStatus</span>
+                                }
+                                else if (b.PaymentStatus == "Pending" || b.PaymentStatus == "Unpaid")
+                                {
+                                    <span class="badge bg-warning text-dark"> @b.PaymentStatus</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-dark text-white">↩️ @b.PaymentStatus</span>
+                                }
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(b.PaymentMethod))
+                                {
+                                    <small>@b.PaymentMethod</small>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">N/A</span>
+                                }
+                            </td>
+                            <td>
+                                @if (b.PaymentStatus == "Paid")
+                                {
+                                    <a asp-action="Invoice" asp-route-id="@b.BookingId"
+                                       class="btn btn-sm btn-success" target="_blank">
+                                        <i class="bi bi-file-earmark-text"></i> View
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">N/A</span>
+                                }
+                            </td>
+                            @if (isAdmin || isStaff)
+                            {
+                                <td class="text-center">
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Edit" asp-route-id="@b.BookingId"
+                                           class="btn btn-sm btn-warning" title="Edit Booking">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        @if (isAdmin)
+                                        {
+                                            <a asp-action="Delete" asp-route-id="@b.BookingId"
+                                               class="btn btn-sm btn-danger" title="Delete Booking">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        }
+                                    </div>
+                                </td>
+                            }
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="@(isAdmin || isStaff ? "15" : "14")" class="text-center text-muted py-5">
+                            <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                            <p class="mt-2">No bookings found.</p>
+                            @if (isAdmin)
+                            {
+                                <text>Click "Add New Booking" to create one.</text>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Summary Footer -->
+    <div class="mt-3 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <p class="mb-0">
+                    <strong>Showing:</strong> @Model.Count booking(s) |
+                    <strong>Total Revenue:</strong> RM @ViewBag.TotalRevenue.ToString("N2") |
+                    <strong>Confirmed:</strong> @ViewBag.ConfirmedBookings |
+                    <strong>Pending:</strong> @ViewBag.PendingBookings |
+                    <strong>Paid:</strong> @ViewBag.PaidCount
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Role Info -->
+    @if (isClient)
+    {
+        <div class="alert alert-light border" role="alert">
+            <h5 class="alert-heading"><i class="bi bi-shield-lock"></i> Client Access Level</h5>
+            <p class="mb-0">You currently have <strong>view-only</strong> access to the booking system. To request modifications or add new bookings, please contact the administrator.</p>
+        </div>
+    }
+    else if (isStaff)
+    {
+        <div class="alert alert-light border" role="alert">
+            <h5 class="alert-heading"><i class="bi bi-shield-check"></i> Staff Access Level</h5>
+            <p class="mb-0">You have <strong>view and edit</strong> permissions. You can modify existing bookings but cannot add or delete records.</p>
+        </div>
+    }
+
+    <script>
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+
+        window.addEventListener('load', function () {
+            var savedPos = sessionStorage.getItem('bookingScrollPos');
+            if (savedPos) {
+                window.scrollTo(0, parseInt(savedPos));
+                sessionStorage.removeItem('bookingScrollPos');
+            }
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var forms = document.querySelectorAll('form[asp-action="Index"]');
+
+            forms.forEach(function(form) {
+                form.addEventListener('submit', function() {
+                    sessionStorage.setItem('bookingScrollPos', window.pageYOffset);
+                });
+            });
+        });
+    </script>
+</div>

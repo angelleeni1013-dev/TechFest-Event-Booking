@@ -1,0 +1,204 @@
+﻿@model ClientBookingViewModel
+@{
+    ViewData["Title"] = "Create New Booking";
+}
+
+<div class="container mt-4">
+    <h1 class="mb-4" style="color:#3a2d34">Create New Booking</h1>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>✗</strong> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <form asp-action="CreateBooking" method="post" id="bookingForm">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="card mb-3">
+            <div class="card-header text-white" style="background-color:#3a2d34">
+                <h5 class="mb-0">Event Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label asp-for="EventName" class="form-label">Event Name: <span class="text-danger">*</span></label>
+                    <select asp-for="EventName" class="form-select" aria-label="Select event type">
+                        <option value="">-- Select Event Type --</option>
+                        <option value="Workshop">Workshop</option>
+                        <option value="Competition">Competition</option>
+                        <option value="Talk">Talk</option>
+                        <option value="Booth">Booth</option>
+                    </select>
+                    <span asp-validation-for="EventName" class="text-danger small"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header text-white" style="background-color:#3a2d34">
+                <h5 class="mb-0">Client Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ClientName" class="form-label">Client Name: <span class="text-danger">*</span></label>
+                        <input asp-for="ClientName" class="form-control" placeholder="Enter full name" />
+                        <span asp-validation-for="ClientName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ClientEmail" class="form-label">Email: <span class="text-danger">*</span></label>
+                        <input asp-for="ClientEmail" type="email" class="form-control" readonly style="background-color: #e9ecef;" />
+                        <span asp-validation-for="ClientEmail" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ContactNumber" class="form-label">Contact Number: <span class="text-danger">*</span></label>
+                    <input asp-for="ContactNumber" class="form-control" placeholder="Format: 01X-XXXXXXX" />
+                    <span asp-validation-for="ContactNumber" class="text-danger small"></span>
+                    <small class="form-text text-muted">Malaysian mobile number format: 01X-XXXXXXX or 01X-XXXXXXXX</small>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="DateOfBirth" class="form-label">Date of Birth: <span class="text-danger">*</span></label>
+                        <input asp-for="DateOfBirth"
+                               type="date"
+                               class="form-control"
+                               value="2000-01-01"
+                               min="1920-01-01"
+                               max="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                        <span asp-validation-for="DateOfBirth" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Gender" class="form-label">Gender: <span class="text-danger">*</span></label>
+                        <select asp-for="Gender" class="form-select" aria-label="Select gender">
+                            <option value="">-- Select Gender --</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <span asp-validation-for="Gender" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header text-white" style="background-color:#3a2d34">
+                <h5 class="mb-0">Event Day(s)</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Select Days: <span class="text-danger">*</span></label>
+
+                    <div class="d-flex gap-3 flex-wrap">
+                        <div class="form-check me-3">
+                            <input class="form-check-input day-checkbox" type="checkbox" name="SelectedDays" value="1" id="day1">
+                            <label class="form-check-label" for="day1">Day 1 (July 24, 2026)</label>
+                        </div>
+                        <div class="form-check me-3">
+                            <input class="form-check-input day-checkbox" type="checkbox" name="SelectedDays" value="2" id="day2">
+                            <label class="form-check-label" for="day2">Day 2 (July 25, 2026)</label>
+                        </div>
+                        <div class="form-check me-3">
+                            <input class="form-check-input day-checkbox" type="checkbox" name="SelectedDays" value="3" id="day3">
+                            <label class="form-check-label" for="day3">Day 3 (July 26, 2026)</label>
+                        </div>
+                    </div>
+                    <span asp-validation-for="SelectedDays" class="text-danger small"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header text-white" style="background-color:#3a2d34">
+                <h5 class="mb-0">Ticket Selection</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label asp-for="TicketType" class="form-label">Ticket Type: <span class="text-danger">*</span></label>
+                    <select asp-for="TicketType" class="form-select" id="ticketTypeSelect" aria-label="Select ticket type">
+                        <option value="">-- Choose your ticket type --</option>
+                        @if (ViewBag.IsEarlyBirdAvailable)
+                        {
+                            <option value="early-bird" data-price="120">
+                                Early Bird Ticket (RM120/day) **until 30/06/2026
+                            </option>
+                        }
+                        <option value="regular" data-price="150">Regular Ticket (RM150/day)</option>
+                        <option value="student" data-price="80">Student Pass (RM80/day) **Ages 16-25 only</option>
+                    </select>
+                    <span asp-validation-for="TicketType" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label for="pricePerDay" class="form-label">Price per Day:</label>
+                    <div class="input-group">
+                        <span class="input-group-text">RM</span>
+                        <input type="text" class="form-control" id="pricePerDay" readonly value="0.00" />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Total Charges (RM): <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text">RM</span>
+                        <input type="text" class="form-control" id="totalCharges" readonly value="0.00" style="font-weight: bold;" />
+                    </div>
+                    <small class="form-text text-muted">Price per day × Selected day(s)</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 mb-5">
+            <button type="submit" class="btn btn-primary btn-lg me-2">
+                <i class="bi bi-check-circle"></i> Proceed to Payment
+            </button>
+            <a asp-action="MyBookings" class="btn btn-secondary btn-lg">
+                <i class="bi bi-arrow-left"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            const ticketTypeSelect = $('#ticketTypeSelect');
+            const dayCheckboxes = $('.day-checkbox');
+            const pricePerDayInput = $('#pricePerDay');
+            const totalChargesInput = $('#totalCharges');
+
+            function updatePriceDisplay() {
+                const selectedOption = ticketTypeSelect.find('option:selected');
+                const pricePerDay = parseFloat(selectedOption.attr('data-price')) || 0;
+                pricePerDayInput.val(pricePerDay.toFixed(2));
+                calculateTotal();
+            }
+
+            function calculateTotal() {
+                const pricePerDay = parseFloat(pricePerDayInput.val()) || 0;
+                const daysSelectedCount = dayCheckboxes.filter(':checked').length;
+
+                if (daysSelectedCount > 0) {
+                    const total = pricePerDay * daysSelectedCount;
+                    totalChargesInput.val(total.toFixed(2));
+                } else {
+                    totalChargesInput.val("0.00");
+                }
+            }
+
+            ticketTypeSelect.on('change', updatePriceDisplay);
+            dayCheckboxes.on('change', calculateTotal);
+
+            updatePriceDisplay();
+        });
+    </script>
+}

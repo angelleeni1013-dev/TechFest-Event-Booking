@@ -1,0 +1,244 @@
+﻿@model A2_TechFest_2026.Models.Booking
+@{
+    ViewData["Title"] = "Edit Booking";
+}
+
+<div class="container mt-4">
+    <h1 class="mb-4" style="color:#3a2d34">Edit Booking Info</h1>
+
+    <form asp-action="Edit" method="post" class="needs-validation" novalidate>
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="BookingId" />
+
+        <div class="card mb-3">
+            <div class="card-header text-white" style="background-color:#3a2d34">
+                <h5 class="mb-0">Event Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label asp-for="EventName" class="form-label">Event Name: <span class="text-danger">*</span></label>
+                    <select asp-for="EventName" class="form-select" aria-label="Select event type">
+                        <option value="">-- Select Event Type --</option>
+                        <option value="Workshop">Workshop</option>
+                        <option value="Competition">Competition</option>
+                        <option value="Talk">Talk</option>
+                        <option value="Booth">Booth</option>
+                    </select>
+                    <span asp-validation-for="EventName" class="text-danger small"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header text-white" style="background-color:#3a2d34">
+                <h5 class="mb-0">Client Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ClientName" class="form-label">Client Name: <span class="text-danger">*</span></label>
+                        <input asp-for="ClientName" class="form-control" placeholder="Enter full name" />
+                        <span asp-validation-for="ClientName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ClientEmail" class="form-label">Email: <span class="text-danger">*</span></label>
+                        <input asp-for="ClientEmail" type="email" class="form-control" placeholder="example@email.com" />
+                        <span asp-validation-for="ClientEmail" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ContactNumber" class="form-label">Contact Number: <span class="text-danger">*</span></label>
+                    <input asp-for="ContactNumber" class="form-control" placeholder="Format: 01X-XXXXXXX (e.g., 012-3456789)" />
+                    <span asp-validation-for="ContactNumber" class="text-danger small"></span>
+                    <small class="form-text text-muted">Malaysian mobile number format: 01X-XXXXXXX or 01X-XXXXXXXX</small>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="DateOfBirth" class="form-label">Date of Birth: <span class="text-danger">*</span></label>
+                        <input asp-for="DateOfBirth"
+                               type="date"
+                               class="form-control"
+                               value="2000-01-01"
+                               min="1920-01-01"
+                               max="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                        <span asp-validation-for="DateOfBirth" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Gender" class="form-label">Gender: <span class="text-danger">*</span></label>
+                        <select asp-for="Gender" class="form-select" aria-label="Select gender">
+                            <option value="">-- Select Gender --</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <span asp-validation-for="Gender" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header text-white" style="background-color:#3a2d34">
+                <h5 class="mb-0">Event Day</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label asp-for="Day" class="form-label">Select Day: <span class="text-danger">*</span></label>
+                    <select asp-for="Day" class="form-select" id="daySelect" aria-label="Select event day">
+                        <option value="">-- Select Day --</option>
+                        <option value="1">Day 1</option>
+                        <option value="2">Day 2</option>
+                        <option value="3">Day 3</option>
+                    </select>
+                    <span asp-validation-for="Day" class="text-danger small"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header text-white" style="background-color:#3a2d34">
+                <h5 class="mb-0">Ticket Selection</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label asp-for="TicketType" class="form-label">Ticket Type: <span class="text-danger">*</span></label>
+                    <select asp-for="TicketType" class="form-select" id="ticketTypeSelect" aria-label="Select ticket type">
+                        <option value="">-- Choose your ticket type --</option>
+                        @if (ViewBag.IsEarlyBirdAvailable)
+                        {
+                            <option value="early-bird" data-price="120">
+                                Early Bird Ticket (RM120/day) **until 30/06/2026
+                            </option>
+                        }
+                        <option value="regular" data-price="150">Regular Ticket (RM150/day)</option>
+                        <option value="student" data-price="80">Student Pass (RM80/day) **Ages 16-25 only</option>
+                    </select>
+                    <span asp-validation-for="TicketType" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label for="pricePerDay" class="form-label">Price per Day:</label>
+                    <div class="input-group">
+                        <span class="input-group-text">RM</span>
+                        <input type="text" class="form-control" id="pricePerDay" readonly value="0.00" aria-label="Price per day" />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Charges" class="form-label">Total Charges (RM): <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text">RM</span>
+                        <input asp-for="Charges" type="number" step="0.01" min="0.01" class="form-control" id="totalCharges" readonly aria-label="Total charges" />
+                    </div>
+                    <span asp-validation-for="Charges" class="text-danger small"></span>
+                    <small class="form-text text-muted">This booking is for ONE day only</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header text-white" style="background-color:#3a2d34">
+                <h5 class="mb-0">Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label asp-for="Status" class="form-label">Booking Status: <span class="text-danger">*</span></label>
+                    <select asp-for="Status" class="form-select" aria-label="Select booking status">
+                        <option value="Pending">Pending</option>
+                        <option value="Confirmed">Confirmed</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                    <span asp-validation-for="Status" class="text-danger small"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header text-white" style="background-color:#3a2d34">
+                <h5 class="mb-0">Payment Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label asp-for="PaymentStatus" class="form-label">Payment Status: <span class="text-danger">*</span></label>
+                    <select class="form-select" asp-for="PaymentStatus" id="paymentStatusSelect" aria-label="Select payment status">
+                        <option value="">-- Select Payment Status --</option>
+                        <option value="Unpaid">Unpaid</option>
+                        <option value="Paid">Paid</option>
+                        <option value="Refunded">Refunded</option>
+                    </select>
+                    <span asp-validation-for="PaymentStatus" class="text-danger small"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header text-white" style="background-color:#3a2d34">
+                <h5 class="mb-0">Payment Method</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label asp-for="PaymentMethod" class="form-label">Payment Method:</label>
+                    <select class="form-select" asp-for="PaymentMethod" id="paymentMethodSelect" aria-label="Select payment method">
+                        <option value="">-- Select Payment Method --</option>
+                        <option value="Credit/Debit Card">Credit/Debit Card</option>
+                        <option value="Touch 'n Go eWallet">Touch 'n Go eWallet</option>
+                        <option value="Online Banking">Online Banking (FPX)</option>
+                    </select>
+                    <span asp-validation-for="PaymentMethod" class="text-danger small"></span>
+                    <small class="form-text text-muted">Payment method is required when payment status is "Paid"</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 mb-5">
+            <button type="submit" class="btn btn-warning btn-lg me-2">
+                <i class="bi bi-save"></i> Update Booking
+            </button>
+            <a asp-action="Index" class="btn btn-secondary btn-lg">
+                <i class="bi bi-arrow-left"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        function updatePriceDisplay()
+        {
+            const ticketTypeSelect = document.getElementById('ticketTypeSelect');
+            const selectedOption = ticketTypeSelect.options[ticketTypeSelect.selectedIndex];
+            const pricePerDay = selectedOption.getAttribute('data-price') || 0;
+
+            document.getElementById('pricePerDay').value = parseFloat(pricePerDay).toFixed(2);
+            document.getElementById('totalCharges').value = parseFloat(pricePerDay).toFixed(2);
+        }
+
+        document.getElementById('ticketTypeSelect').addEventListener('change', updatePriceDisplay);
+
+        const paymentStatusSelect = document.getElementById('paymentStatusSelect');
+        const paymentMethodSelect = document.getElementById('paymentMethodSelect');
+
+        function togglePaymentMethod() {
+            if (paymentStatusSelect.value === 'Paid') {
+                paymentMethodSelect.disabled = false;
+                paymentMethodSelect.required = true;
+            } else {
+                paymentMethodSelect.disabled = true;
+                paymentMethodSelect.required = false;
+                paymentMethodSelect.value = '';
+            }
+        }
+
+        togglePaymentMethod();
+        paymentStatusSelect.addEventListener('change', togglePaymentMethod);
+
+        window.addEventListener('load', function()
+        {
+            updatePriceDisplay();
+        });
+    </script>
+}
