@@ -1,0 +1,71 @@
+﻿@page
+@model A2_TechFest_2026.Areas.Identity.Pages.Account.VerifyEmailModel
+@{
+    ViewData["Title"] = "Verify Email";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <div class="mb-3">
+                        <i class="bi bi-envelope-check" style="font-size: 4rem; color: #667eea;"></i>
+                    </div>
+                    <h2>@ViewData["Title"]</h2>
+                    <p class="text-muted">We've sent a verification code to</p>
+                    <p class="fw-bold">@Model.Email</p>
+                </div>
+
+                <form id="verify-form" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+
+                    <input type="hidden" asp-for="Email" />
+
+                    <div class="form-floating mb-3">
+                        <input asp-for="VerificationCode" class="form-control text-center"
+                               style="letter-spacing: 8px; font-size: 24px; font-weight: bold;"
+                               placeholder="000000" maxlength="6" />
+                        <label asp-for="VerificationCode">Enter 6-Digit Code</label>
+                        <span asp-validation-for="VerificationCode" class="text-danger"></span>
+                    </div>
+
+                    <div class="alert alert-info" role="alert">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Tip:</strong> Check your inbox and spam folder. Code expires in 15 minutes.
+                    </div>
+
+                    <button id="verify-submit" type="submit" class="btn btn-lg btn-primary w-100 mb-3">
+                        <i class="bi bi-check-circle"></i> Verify Email
+                    </button>
+
+                    <div class="text-center">
+                        <p class="mb-0">Didn't receive the code?</p>
+                        <button type="submit" asp-page-handler="ResendCode" class="btn btn-link">
+                            <i class="bi bi-arrow-clockwise"></i> Resend Code
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="text-center mt-3">
+            <a asp-page="./Login" class="text-muted">
+                <i class="bi bi-arrow-left"></i> Back to Login
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Auto-focus on verification code input
+        document.getElementById('VerificationCode').focus();
+
+        // Only allow numbers in verification code
+        document.getElementById('VerificationCode').addEventListener('input', function (e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+    </script>
+}
